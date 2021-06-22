@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 19:21:03 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 17:37:38 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 19:28:55 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,11 @@ Directory::~Directory()
 void Directory::open(std::string path)
 {
 	if ((_dir = opendir(path.c_str())) != NULL)
+	{
+		fcntl(_dir->__dd_fd, F_SETFL, O_NONBLOCK);
 		_is_open = true;
+		_path = path;
+	}
 }
 
 std::string Directory::getNextName()
@@ -42,12 +46,23 @@ std::string Directory::getNextName()
 		if ((_ent = readdir(_dir)) != NULL)
 		{
 			if (_ent->d_type == DT_DIR)
+			{
 				return (std::string(_ent->d_name) + '/');
+				_is_dir = true;
+			}
 			else if (_ent->d_type == DT_REG)
+			{
 				return (std::string(_ent->d_name));
+				_is_dir = false;
+			}
 		}
 	}
 	return (std::string(""));
+}
+
+bool Directory::isDir()
+{
+	return (_is_dir);
 }
 
 bool Directory::isOpen()
@@ -58,4 +73,16 @@ bool Directory::isOpen()
 int Directory::getFD()
 {
 	return (_dir->__dd_fd);
+}
+
+std::string Directory::getPath()
+{
+	return (_path);
+}
+
+bool Directory::str_is_dir(std::string path)
+{
+	struct stat path_stat;
+	stat(path.c_str(), &path_stat);
+	return S_ISDIR(path_stat.st_mode);
 }

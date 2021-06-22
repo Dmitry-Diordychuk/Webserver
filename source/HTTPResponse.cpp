@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:23:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 14:29:53 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/17 18:58:15 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,7 @@ void HTTPResponse::setStatusLine(std::string ver, size_t code, std::string phras
 void HTTPResponse::setBody(std::string body)
 {
 	_body = body;
-	addField("Content-Length", intToStr(body.length() - 1));
-	//addField("Content-Type", "text/html");
+	addField("Content-Length", intToStr(body.length()));
 }
 
 HTTPResponse::HTTPResponse(size_t code, std::string reason)

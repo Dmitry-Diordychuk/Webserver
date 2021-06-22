@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 19:20:42 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 02:50:33 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 19:28:29 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <dirent.h>
 #include <stdexcept>
 #include <string>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 class Directory
 {
@@ -23,6 +25,8 @@ private:
 	DIR				*_dir;
 	struct dirent	*_ent;
 	bool			_is_open;
+	std::string		_path;
+	bool			_is_dir;
 
 public:
 	Directory();
@@ -31,8 +35,12 @@ public:
 
 	void open(std::string path);
 	std::string getNextName();
+	bool isDir();
 	bool isOpen();
 	int getFD();
+	std::string getPath();
+
+	static bool str_is_dir(std::string path);
 };
 
 #endif // __DIRECTORY_H__

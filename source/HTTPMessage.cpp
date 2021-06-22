@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/12 01:54:27 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/13 18:51:31 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/21 14:57:12 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,17 +45,14 @@ void HTTPMessage::setUriMaxLength(size_t len)
 
 size_t HTTPMessage::bodyLength()
 {
-	size_t len = _body.length();
-	if (len > 0)
-		return (len - 1);
-	return (0);
+	return (_body.length());
 }
 
 std::string HTTPMessage::toStr()
 {
 	std::string str;
-	std::map<std::string, std::string>::iterator it = _header_fields.begin();
-	for (; it != _header_fields.end(); ++it)
+	std::map<std::string, std::string>::reverse_iterator it = _header_fields.rbegin();
+	for (; it != _header_fields.rend(); ++it)
 		str += (*it).first + ':' + (*it).second + "\r\n";
 	str += "\r\n" + _body;
 	return (str);

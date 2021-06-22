@@ -6,7 +6,7 @@
 #    By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/06/01 19:43:52 by kdustin           #+#    #+#              #
-#    Updated: 2021/06/16 14:41:23 by kdustin          ###   ########.fr        #
+#    Updated: 2021/06/17 01:12:45 by kdustin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ CXX := clang++
 
 CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -std=c++98 -pedantic
-CXXFLAGS += -glldb -DDEBUG							#Debug
+CXXFLAGS += -g -DDEBUG							#Debug
 
 BUILD_DIR := ./build
 SRC_DIR := ./source
@@ -24,7 +24,7 @@ SRC_DIR := ./source
 SRCS := File.cpp HTTPException.cpp HTTPMessage.cpp HTTPRequest.cpp \
 	HTTPResponse.cpp Location.cpp main.cpp Method.cpp Path.cpp Config.cpp \
 	Server.cpp TCP.cpp URI.cpp Utilities.cpp VirtualServer.cpp HTMLGenerator.cpp \
-	Desc.cpp Directory.cpp Task.cpp
+	Directory.cpp Task.cpp
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 

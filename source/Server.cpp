@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:52:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 17:33:46 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/21 15:22:00 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,39 +24,37 @@ void Server::start()
 {
 	try
 	{
-		Desc descs;
+		std::vector<Task*> tasks;
 		// Инициализация сокетов
 		for (size_t i = 0; i < _config.size(); ++i)
 		{
 			int server_sd = TCP::createConnectionSocket();
+			fcntl(server_sd, F_SETFL, O_NONBLOCK);
 			TCP::bindConnectionSocket(server_sd, _config.getIpAt(i), _config.getPortAt(i));
 			TCP::startListen(server_sd, _config.getMaxSockets());
-
-			descs.addDesc(server_sd, LISTEN);
+			tasks.push_back(new Task(LISTEN, server_sd));
 		}
 
 		// Основной цикл
 		while (1)
 		{
 			// Для каждого набора серверных сокетов.
-			for (size_t i = 0; i < descs.size(); ++i)
+			for (size_t i = 0; i < tasks.size(); ++i)
 			{
-				if (poll(descs.getPollfdSet(), descs.size(), _config.getSocketTimeout()) < 0)
-					throw std::runtime_error(std::string(strerror(errno)));
-
-				if (descs.readyToRead(i))
+				poll(&tasks[i]->getPollfd(), 1, 1);
+				if (tasks[i]->readyToRead() || tasks[i]->readyToWrite())
 				{
-					if (descs.getType(i) == LISTEN)
+					if (tasks[i]->job() == LISTEN)
 					{
 						// Устанавливает TCP соединение.
-						int new_socket = TCP::acceptConnection(descs.getFD(i));
-						descs.addDesc(new_socket, REQUEST);
+						int new_socket = TCP::acceptConnection(tasks[i]->getFD());
+						tasks.push_back(new Task(RECEIVE_REQUEST, new_socket, i));
 					}
-					else if (descs.getType(i) == REQUEST)
+					else if (tasks[i]->job() == RECEIVE_REQUEST)
 					{
 						// Принимает запрос
 						std::stringstream message;
-						message << TCP::reciveMessage(descs.getFD(i));
+						message << TCP::reciveMessage(tasks[i]->getFD());
 
 						// Парсинг запроса
 						HTTPRequest request(8000);
@@ -64,29 +62,34 @@ void Server::start()
 						{
 							request.parseRequest(message);
 						}
-						catch(const std::exception& e)
+						catch(const HTTPException& e)
 						{
-							std::cerr << e.what() << '\n'; // Header error return
-							TCP::closeConnection(descs.getFD(i));
-							descs.delDesc(i);
+							_config.getVirtualServerAt(0, "").formErrorTask(tasks[i], e.getCode(), e.getMessage());
 							continue ;
 						}
 
 						// Обработать запрос и сформировать задачу
-						Task task;
-						task = _config.getVirtualServerAt(i, request.getHostField()).processRequest(request);
-						descs.addDesc(task);
+						_config.getVirtualServerAt(tasks[i]->getVServIndex(), request.getHostField()).
+																					processRequest(request, tasks[i]);
+
+						if (tasks[i]->job() == AUTOINDEX)
+						{
+							TCP::sendMessage(tasks[i]->getFD(), tasks[i]->doJob().toStr());
+							TCP::closeConnection(tasks[i]->getFD());
+							tasks.erase(tasks.begin() + i);
+							--i;
+						}
 					}
-					else if (descs.getType(i) == TASK)
+					else
 					{
 						// Выполнить задачу
-						Task task = descs.getTask(i);
-						HTTPResponse response = task.doJob();
+						HTTPResponse response = tasks[i]->doJob();
 
 						// Отправить ответ
-						TCP::sendMessage(descs.getFD(i), response.toStr());
-						TCP::closeConnection(descs.getFD(i));
-						descs.delDesc(i);
+						TCP::sendMessage(tasks[i]->returnFD(), response.toStr());
+						TCP::closeConnection(tasks[i]->returnFD());
+						tasks.erase(tasks.begin() + i);
+						--i;
 					}
 				}
 			}

@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 16:17:39 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 16:53:13 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/19 20:45:37 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ public:
 
 	void addLocation(Location location);
 
-	Task processRequest(HTTPRequest request);
+	void formErrorTask(Task* task, size_t code, std::string reason);
+	void processRequest(HTTPRequest request, Task* task);
 };
 
 

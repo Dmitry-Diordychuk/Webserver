@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 17:17:48 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 23:30:23 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/21 15:55:21 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,10 +83,10 @@ int TCP::acceptConnection(int sd)
 							);
 	if (new_socket < 0)
 		throw std::runtime_error("Accept: " + std::string(strerror(errno)));
-	return new_socket;
 #ifdef DEBUG
 	std::cout << "Server " << sd << " has accepted new conection SD: " << new_socket << std::endl;
 #endif
+	return new_socket;
 }
 
 void TCP::closeConnection(int sd)
@@ -101,8 +101,8 @@ void TCP::closeConnection(int sd)
 std::string TCP::reciveMessage(int sd)
 {
 	// Функция recv тоже блокирующая
-	char buffer[1024] = {0};
-	recv(sd, buffer, 1024, MSG_PEEK);
+	char buffer[8192] = {0};
+	recv(sd, buffer, 8192, MSG_PEEK);
 #ifdef DEBUG
 	std::cout << "Message from SD: " << sd << "\n" << tab_message(std::string(buffer)) << std::endl;
 #endif
@@ -114,5 +114,5 @@ void TCP::sendMessage(int sd, std::string message)
 #ifdef DEBUG
 	std::cout << "Send message to SD: " << sd << "\n" << tab_message(message) << std::endl;
 #endif
-	send(sd, message.c_str(), message.length() - 1, 0);
+	send(sd, message.c_str(), message.length(), 0);
 }

@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:23:50 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 02:44:59 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/20 20:22:14 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ public:
 	Path getPath();
 	Method getMethod();
 	std::string getHostField();
+	std::string getBody();
 };
 
 

@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:34:22 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 16:56:42 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/16 21:32:38 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "TCP.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
-#include "Desc.hpp"
+#include "Task.hpp"
 #include "HTMLGenerator.hpp"
 #include <poll.h>
 

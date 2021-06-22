@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TCP.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 15:00:00 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/10 16:35:37 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/21 15:30:43 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <poll.h>
+#include "HTTPException.hpp"
 
 #ifdef DEBUG
 #include <iostream>

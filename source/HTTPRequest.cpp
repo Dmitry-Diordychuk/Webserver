@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:25:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 02:59:02 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 18:54:34 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,8 @@ Path parsePathAbsolute(std::stringstream &stream)
 		std::string segment = tryParseSegment(stream);
 		if (!segment.empty())
 			path.addSegment(segment);
+		else
+			path.setIsDirectory(true);
 	}
 	return (path);
 }
@@ -319,12 +321,13 @@ std::string tryParseFieldContent(std::stringstream &stream)
 	std::list<unsigned char>	buffer;
 	char c = stream.peek();
 
+	bool last_vchar = false;
 	if (!isfield_vchar(c))
 		return (field_content);
+	else
+		last_vchar = true;
 	buffer.push_back(stream.get());
 
-	bool one = false;
-	bool last_vchar = false;
 	while ((c = stream.peek()))
 	{
 		if (c == ' ' || c == 9)
@@ -339,18 +342,9 @@ std::string tryParseFieldContent(std::stringstream &stream)
 		}
 		else
 			break ;
-		one = true;
-	}
-	if (one == false)
-	{
-		while (!buffer.empty())
-		{
-			stream.putback(buffer.back());
-			buffer.pop_back();
-		}
 	}
 	if (last_vchar == false)
-		throw BAD_REQUEST_ERROR;
+		throw HTTPException(BAD_REQUEST_ERROR);
 
 	while (!buffer.empty())
 	{
@@ -447,4 +441,9 @@ std::string HTTPRequest::getHostField()
 	if (i != host.npos)
 		return (host.substr(0, i));
 	return (host);
+}
+
+std::string HTTPRequest::getBody()
+{
+	return (_body);
 }

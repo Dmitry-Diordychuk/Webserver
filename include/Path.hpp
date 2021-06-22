@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Path.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 22:17:07 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/13 03:01:15 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 16:44:42 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ public:
 
 	void		setIsEmpty(bool b);
 	void		setIsDirectory(bool b);
+	bool		directory();
 	void		setSegments(cnt segments);
 	void		addSegment(std::string segment);
 	bool		findSegment(Path path, Path::iterator& output_it);

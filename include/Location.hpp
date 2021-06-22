@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/08 15:53:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 01:16:32 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 16:45:23 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ private:
 	std::vector<Method>		_allowed_methods;
 	bool					_autoindex;
 	std::string				_cgi;
+	Path					_upload_directory;
+	size_t					_max_body_size;
 
 	Location();
 public:
@@ -39,10 +41,14 @@ public:
 	void setAutoindex(bool);
 	void setCgi(std::string);
 	void setServerName(std::string);
+	void setUploadDirectory(std::string);
+	void setMaxBodySize(size_t);
 
 	std::string getIndex();
 	std::string getPrefix();
-	bool getAutoindex();
+	bool autoindex();
+	std::string getUploadPath(Path request_path);
+	size_t getMaxBodySize();
 
 	Path checkLocation(Path path);
 	bool checkAllowedMethods(Method method);

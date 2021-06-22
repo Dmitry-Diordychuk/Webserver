@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPException.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 00:41:06 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/10 01:30:54 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/19 20:57:28 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,11 @@ HTTPException& HTTPException::operator=( const HTTPException& other ) throw()
 	return (*this);
 }
 
-size_t HTTPException::getCode(){
+size_t HTTPException::getCode() const {
 	return (_code);
 }
 
-std::string HTTPException::getMessage() {
+std::string HTTPException::getMessage() const {
 	return (_message);
 }
 

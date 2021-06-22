@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 15:47:30 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 01:16:51 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 18:37:42 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,16 @@ void Location::setServerName(std::string server_name)
 	_server_name = server_name;
 }
 
+void Location::setUploadDirectory(std::string dir)
+{
+	_upload_directory = Path(dir);
+}
+
+void Location::setMaxBodySize(size_t size)
+{
+	_max_body_size = size;
+}
+
 std::string Location::getIndex()
 {
 	return (_index);
@@ -60,9 +70,31 @@ std::string Location::getPrefix()
 	return (_prefix.toStr());
 }
 
-bool Location::getAutoindex()
+bool Location::autoindex()
 {
 	return (_autoindex);
+}
+
+std::string Location::getUploadPath(Path request_path)
+{
+	Path result;
+	Path::iterator it_req = request_path.begin();
+	Path::iterator it_prefix = _prefix.begin();
+	for (;*it_req == *it_prefix && it_req != request_path.end() && it_prefix != _prefix.end(); ++it_req, ++it_prefix)
+		result.addSegment(*it_req);
+	Path::iterator it_upload = _upload_directory.begin();
+	for (;it_upload != _upload_directory.end(); ++it_upload)
+		result.addSegment(*it_upload);
+	for (;it_req != request_path.end(); ++it_req)
+		result.addSegment(*it_req);
+	result.setIsDirectory(false);
+	result.setIsEmpty(false);
+	return (result.toStr());
+}
+
+size_t Location::getMaxBodySize()
+{
+	return (_max_body_size);
 }
 
 bool Location::checkAllowedMethods(Method method)
@@ -83,8 +115,13 @@ Path Location::checkLocation(Path path)
 	if (path.findSegment(_prefix, fit))
 	{
 		result = _root;
+		Path::iterator upload_it = _upload_directory.begin();
+		if (fit != path.end() && upload_it != _upload_directory.end() && *upload_it != *fit)
+			for (; upload_it != _upload_directory.end(); ++upload_it)
+				result.addSegment(*upload_it);
 		for (; fit != path.end(); ++fit)
 			result.addSegment(*fit);
+		result.setIsDirectory(path.directory());
 	}
 	return (result);
 }

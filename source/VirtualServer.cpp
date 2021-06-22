@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 16:18:43 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 01:18:12 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 19:30:06 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,19 @@ void VirtualServer::addLocation(Location location) {
 		std::sort(_locations.begin(), _locations.end(), compLocation);
 }
 
-Task VirtualServer::processRequest(HTTPRequest request)
+void VirtualServer::formErrorTask(Task* task, size_t code, std::string reason)
+{
+	// Выбор в зависимости от кода ошибки добавить
+	File* error_file = new File(_error_page, false);
+	if (!error_file->isOpen())
+	{
+		task->changeJob(DEFAULT_ERROR, HTTPResponse(code, reason));
+		return ;
+	}
+	task->changeJob(GET_FILE_CONTENT, error_file, HTTPResponse(code, reason));
+}
+
+void VirtualServer::processRequest(HTTPRequest request, Task* task)
 {
 	std::vector<Location>::iterator it = _locations.begin();
 	for (; it != _locations.end(); ++it)
@@ -59,40 +71,68 @@ Task VirtualServer::processRequest(HTTPRequest request)
 		Path response_path = (*it).checkLocation(request.getPath());
 		if (!response_path.empty())
 		{
-			if (!(*it).checkAllowedMethods(request.getMethod()))
+			if (!it->checkAllowedMethods(request.getMethod()))
 			{
-				///////////////////////////////////////////////////////////////////////////Страницы для разных ошибок
-				return (Task(HTTPResponse(405, "Method Not Allowed"), DEFAULT_ERROR));
+				formErrorTask(task, 405, "Method Not Allowed");
+				return ;
 			}
-			if ((*it).getAutoindex())
+			else if (request.getMethod() == POST)
 			{
-				Directory dir(response_path.toStr());
-				if (!dir.isOpen())
+				if (request.bodyLength() > it->getMaxBodySize())
 				{
-					File error_file(_error_page);
-					if (!error_file.isOpen())
-						return (Task(HTTPResponse(404, "Not Found"), DEFAULT_ERROR));
-					return (Task(HTTPResponse(404, "Not Found"), error_file));
+					formErrorTask(task, 413, "Request Entity Too Large");
+					return ;
 				}
-				return (Task(HTTPResponse(200, "OK"), dir));
+				File *file = new File(response_path.toStr(), true); //???????????
+				if (!file->isOpen())
+				{
+#ifdef DEBUG
+					std::cout << "Post file error!" << std::endl;
+#endif // !DEBUG
+					formErrorTask(task, 500, "Internal Server Error");
+					return ;
+				}
+				int code = 200;
+				if (file->wasCreated() == true)
+					code = 201;
+				task->changeJob(UPLOAD, file, it->getUploadPath(request.getPath()), request.getBody(), HTTPResponse(code, "OK"));
+				return ;
+			}
+			else if (request.getMethod() == DELETE)
+			{
+				File* file = new File(response_path.toStr(), false);
+				if (!file->isOpen())
+				{
+					formErrorTask(task, 404, "Not Found");
+					return ;
+				}
+				task->changeJob(DELETE_FILE, file, HTTPResponse(200, "OK"));
+				return ;
+			}
+			else if (it->autoindex() && (response_path.directory() || Directory::str_is_dir(response_path.toStr())))
+			{
+				task->changeJob(AUTOINDEX, new Directory(response_path.toStr()), HTTPResponse(200, "OK"));
+				return ;
 			}
 			else
 			{
-
-				File file(response_path.toStr() + (*it).getIndex());
-				if (!file.isOpen())
+				response_path.addSegment(it->getIndex());
+				if (!it->getIndex().empty())
+					response_path.setIsDirectory(false);
+				File* file = new File(response_path.toStr(), false);
+				if (!file->isOpen())
 				{
-					File error_file(_error_page);
-					if (!error_file.isOpen())
-						return (Task(HTTPResponse(404, "Not Found"), DEFAULT_ERROR));
-					return (Task(HTTPResponse(404, "Not Found"), error_file));
+					formErrorTask(task, 404, "Not Found");
+					return ;
 				}
-				return (Task(HTTPResponse(200, "OK"), file));
+				if (request.getMethod() == HEAD)
+					task->changeJob(EMPTY_BODY, file, HTTPResponse(200, "OK"));
+				else
+					task->changeJob(GET_FILE_CONTENT, file, HTTPResponse(200, "OK"));
+				return ;
 			}
 		}
 	}
-	File error_file(_error_page);
-	if (!error_file.isOpen())
-		return (Task(HTTPResponse(404, "Not Found"), DEFAULT_ERROR));
-	return (Task(HTTPResponse(404, "Not Found"), error_file));
+	formErrorTask(task, 404, "Not Found");
+	return ;
 }

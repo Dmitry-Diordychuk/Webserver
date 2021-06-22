@@ -6,88 +6,198 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/16 00:07:22 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 17:40:13 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 18:19:05 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Task.hpp"
 
 Task::Task() {}
-Task::~Task() {}
 
-int Task::getFD()
+Task::Task(Job job, size_t socket)
 {
-	return (_fd);
+	_dir = NULL;
+	_file = NULL;
+
+	_job = job;
+	_pollfd.fd = socket;
+	_pollfd.events = POLLIN;
+	_pollfd.revents = 1;
+}
+
+Task::Task(Job job, size_t socket, size_t server_index)
+{
+	_dir = NULL;
+	_file = NULL;
+
+	_job = job;
+	_pollfd.fd = socket;
+	_pollfd.events = POLLIN;
+	_pollfd.revents = 1;
+	_vserv_index = server_index;
 }
 
 Task::Task(const Task& other)
 {
-	_fd = other._fd;
+	_return_fd = other._return_fd;
 	_response = other._response;
-	_todo = other._todo;
+	_job = other._job;
 	_file = other._file;
 	_dir = other._dir;
+	_vserv_index = other._vserv_index;
 }
 
 Task& Task::operator=(const Task& rhs)
 {
 	if (this == &rhs)
 		return (*this);
-	_fd = rhs._fd;
+	_return_fd = rhs._return_fd;
 	_response = rhs._response;
-	_todo = rhs._todo;
+	_job = rhs._job;
 	_file = rhs._file;
 	_dir = rhs._dir;
+	_vserv_index = rhs._vserv_index;
 	return (*this);
 }
 
-Task::Task(HTTPResponse response, ToDo todo) {
-	_response = response;
-	_todo = todo;
-	_fd = -1;
+Task::~Task() {
+	delete _dir;
+	delete _file;
 }
 
-Task::Task(HTTPResponse response, File file)
+// void Task::pollJobs(std::vector<Task*> tasks)
+// {
+// 	// std::vector<Task*>::iterator it = tasks.begin();
+// 	// for (; it != tasks.end(); ++it)
+// 	// {
+// 	// 	pollfd* pollfd = &(*it)->_pollfd;
+// 	// 	if ( < 0)
+// 	// 		throw std::runtime_error(std::string(strerror(errno)));
+// 	// }
+// }
+
+bool Task::readyToRead()
 {
-	_response = response;
-	_todo = GET_FILE_CONTENT;
-	_fd = file.getFD();
+	if (_pollfd.revents & POLLIN)
+	{
+		_pollfd.revents &= ~POLLIN;
+		return (true);
+	}
+	return (false);
 }
 
-Task::Task(HTTPResponse response, Directory dir)
+bool Task::readyToWrite()
 {
-	_response = response;
-	_todo = AUTOINDEX;
-	_fd = dir.getFD();
+	if (_pollfd.revents & POLLOUT)
+	{
+		_pollfd.revents &= ~POLLOUT;
+		return (true);
+	}
+	return (false);
 }
 
-HTTPResponse Task::getHTTPMessage()
+int Task::getFD()
 {
-	return (_response);
+	return (_pollfd.fd);
 }
 
-ToDo Task::getTodo()
+int Task::returnFD()
 {
-	return (_todo);
+	return (_return_fd.fd);
 }
 
-File Task::getFile()
+size_t Task::getVServIndex()
 {
-	return (_file);
+	return (_vserv_index);
 }
 
-Directory Task::getDir()
+Job Task::job()
 {
-	return (_dir);
+	return (_job);
+}
+
+void Task::changeJob(Job new_job, HTTPResponse message)
+{
+	_response = message;
+	_job = new_job;
+}
+
+void Task::changeJob(Job new_job, File *file, HTTPResponse message)
+{
+	_file = file;
+	_job = new_job;
+	_response = message;
+	_return_fd = _pollfd;
+	_pollfd.fd = _file->getFD();
+	_pollfd.events = POLLIN;
+	_pollfd.revents = 1;
+}
+
+void Task::changeJob(Job new_job, Directory *dir, HTTPResponse message)
+{
+	_job = new_job;
+	_dir = dir;
+	_job = AUTOINDEX;
+	_response = message;
+}
+
+void Task::changeJob(Job new_job, File *file, std::string servpath, std::string content, HTTPResponse message)
+{
+	_job = new_job;
+	_file = file;
+	_storage = content;
+	_response = message;
+	_return_fd = _pollfd;
+	_pollfd.fd = _file->getFD();
+	_pollfd.events = POLLOUT;
+	_pollfd.revents = 1;
+	_server_path = servpath;
+}
+
+std::string getCurrentTime()
+{
+	char mbstr[100];
+	std::time_t t = std::time(NULL);
+	std::strftime(mbstr, sizeof(mbstr), "%a, %d %b %Y %H:%M:%S GMT", std::gmtime(&t));
+	return (std::string(mbstr));
 }
 
 HTTPResponse Task::doJob()
 {
-	if (_todo == GET_FILE_CONTENT)
-		_response.setBody(_file.getContent());
-	// else if (task.getTodo() == AUTOINDEX)
-	// 	response.setBody(task.getDir() // АВТОИНДЕКС
+	_response.addField("Server", "42Webserv");
+	_response.addField("Date", getCurrentTime());
+	if (_job == GET_FILE_CONTENT || _job == EMPTY_BODY)
+	{
+		_response.addField("Last-Modified", _file->getLastModTime());
+		if (_job == GET_FILE_CONTENT)
+			_response.setBody(_file->getContent());
+		else if (_job == EMPTY_BODY)
+			_response.addField("Content-Length", intToStr(_file->getContent().length()));
+		_response.addField("Content-Type", _file->getType());
+		_response.addField("Connection", "Closed");
+	}
+	else if (_job == AUTOINDEX)
+	{
+		_response.addField("Last-Modified", getCurrentTime());
+	 	_response.setBody(HTMLGenerator::Autoindex(_dir));
+		_response.addField("Content-Type", "text/html");
+		_response.addField("Connection", "Closed");
+	}
+	else if (_job == UPLOAD)
+	{
+		_file->writeToFile(_storage);
+		_response.addField("Location", _server_path);
+	}
+	else if (_job == DELETE_FILE)
+		_file->deleteFile();
 	// else if (task.getTodo() == DEFAULT_ERROR)
 	// 	response.setBody()           // Ошибка генерировать
+
+
 	return (_response);
+}
+
+pollfd& Task::getPollfd()
+{
+	return (_pollfd);
 }

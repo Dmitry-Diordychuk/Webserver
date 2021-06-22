@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 19:55:24 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 19:57:58 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 19:19:32 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,12 @@ int main()
 	location3.setAllowedMethods(methods_default);
 	location3.setRoot("./../test/www/");
 
-	//Location location4("/protected");
-
-	//Location location5("/post");
+	Location location5("/post");
+	location5.setAllowedMethods(methods_default);
+	location5.setRoot("./../test/www/");
+	location5.setMaxBodySize(1000);
+	location5.setAutoindex(true);
+	location5.setUploadDirectory("/tmp/");
 
 	Location location6("/index/");
 	location6.setAllowedMethods(methods_default);
@@ -57,6 +60,7 @@ int main()
 	virtserver_localhost.addLocation(location1);
 	virtserver_localhost.addLocation(location2);
 	virtserver_localhost.addLocation(location3);
+	virtserver_localhost.addLocation(location5);
 	virtserver_localhost.addLocation(location6);
 
 
@@ -78,7 +82,7 @@ int main()
 	location3_1.setRoot("./../test/www/");
 	location3_1.setIndex("google.html");
 
-	Location location3_2("/auto");
+	Location location3_2("/auto/");
 	location3_2.setAllowedMethods(methods_default);
 	location3_2.setRoot("./../test/www/auto");
 	location3_2.setAutoindex(true);
