@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 00:38:04 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/19 20:57:10 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 19:47:32 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,5 +39,6 @@ public:
 // Server Errors
 #define INTERNAL_SERVER_ERROR	500, "Internal Server Error"
 #define NOT_IMPLEMENTED_ERROR	501, "Not Implemented"
+#define VERSION_NOT_SUPPORTED	505, "HTTP Version Not Supported"
 
 #endif // HTTP_EXCEPTION

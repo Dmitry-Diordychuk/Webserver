@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 22:23:29 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 19:26:09 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 20:26:49 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ void Path::setSegments(cnt segments)
 
 void Path::addSegment(std::string segment)
 {
+	_len += segment.length() + 1;
 	if (!segment.empty())
 		_segments.push_back(segment);
 }

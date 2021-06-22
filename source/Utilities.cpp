@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utilities.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 02:36:25 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/09 14:15:04 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 22:44:41 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,4 +30,17 @@ std::string trim(std::string str)
 	while (isspace(str[j]) && j > 0)
 		++j;
 	return (str.substr(i, j - i));
+}
+
+bool cmpCaseInsensetive::operator()(const std::string& a, const std::string& b) const {
+	std::string::const_iterator ita = a.begin();
+	std::string::const_iterator itb = b.begin();
+	for (; ita != a.end() && itb != b.end(); ++ita, ++itb)
+	{
+		if (std::tolower(*ita) != std::tolower(*itb))
+			return (true);
+	}
+	if (ita != a.end() || itb != b.end())
+		return (true);
+	return (false);
 }

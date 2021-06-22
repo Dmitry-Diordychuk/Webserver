@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:52:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/21 15:22:00 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 21:55:31 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,21 +56,20 @@ void Server::start()
 						std::stringstream message;
 						message << TCP::reciveMessage(tasks[i]->getFD());
 
-						// Парсинг запроса
 						HTTPRequest request(8000);
 						try
 						{
+							// Парсинг запроса
 							request.parseRequest(message);
+							// Обработать запрос и сформировать задачу
+							_config.getVirtualServerAt(tasks[i]->getVServIndex(),
+														request.getHostField()).processRequest(request, tasks[i]);
 						}
 						catch(const HTTPException& e)
 						{
 							_config.getVirtualServerAt(0, "").formErrorTask(tasks[i], e.getCode(), e.getMessage());
 							continue ;
 						}
-
-						// Обработать запрос и сформировать задачу
-						_config.getVirtualServerAt(tasks[i]->getVServIndex(), request.getHostField()).
-																					processRequest(request, tasks[i]);
 
 						if (tasks[i]->job() == AUTOINDEX)
 						{

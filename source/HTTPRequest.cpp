@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:25:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 18:54:34 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 00:22:34 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,11 @@ bool isseparator(unsigned char c)
 	|| c == ';' || c == ':' || c == '\\' || c == '\"' || c == '/' || c == '[' ||
 	c == ']' || c == '?' || c == '?' || c == '=' || c == '{' || c == '}' ||
 	c == ' ' || c == 9);
+}
+
+bool ishex(unsigned char c)
+{
+	return (isdigit(c) || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F');
 }
 
 bool isunreserved(unsigned char c)
@@ -167,7 +172,7 @@ Path parsePathAbsolute(std::stringstream &stream)
 	char c;
 	stream.get(c);
 	if (c != '/')
-		throw BAD_REQUEST_ERROR;
+		throw HTTPException(BAD_REQUEST_ERROR);
 	path.setIsEmpty(false);
 	std::string segment_nz = tryParseSegmentNz(stream);
 	if (segment_nz.empty())
@@ -248,7 +253,7 @@ void HTTPRequest::parseRequestTarget(std::stringstream &stream)
 		_request_line.uri.setQuery(tryParseQuery(stream));
 
 	if (_request_line.uri.length() > _uri_max_length)
-		throw (URI_TOO_LONG_ERROR);
+		throw HTTPException(URI_TOO_LONG_ERROR);
 }
 
 void HTTPRequest::parseHTTPVersion(std::stringstream &stream)
@@ -256,34 +261,38 @@ void HTTPRequest::parseHTTPVersion(std::stringstream &stream)
 	char c;
 	stream.get(c);
 	if (c != 'H')
-		throw (BAD_REQUEST_ERROR);
+		throw HTTPException(BAD_REQUEST_ERROR);
 	_request_line.version += c;
 	for (size_t i = 0; i < 2; ++i)
 	{
 		stream.get(c);
 		if (c != 'T')
-			throw (BAD_REQUEST_ERROR);
+			throw HTTPException(BAD_REQUEST_ERROR);
 		_request_line.version += c;
 	}
 	stream.get(c);
 	if (c != 'P')
-		throw (BAD_REQUEST_ERROR);
+		throw HTTPException(BAD_REQUEST_ERROR);
 	_request_line.version += c;
 	stream.get(c);
 	if (c != '/')
-		throw (BAD_REQUEST_ERROR);
+		throw HTTPException(BAD_REQUEST_ERROR);
 	_request_line.version += c;
 	stream.get(c);
+	if (c != '1')
+		throw HTTPException(VERSION_NOT_SUPPORTED);
 	if (!isdigit(c))
-		throw (BAD_REQUEST_ERROR);
+		throw HTTPException(BAD_REQUEST_ERROR);
 	_request_line.version += c;
 	stream.get(c);
 	if (c != '.')
-		throw (BAD_REQUEST_ERROR);
+		throw HTTPException(BAD_REQUEST_ERROR);
 	_request_line.version += c;
 	stream.get(c);
+	if (c != '1')
+		throw HTTPException(VERSION_NOT_SUPPORTED);
 	if (!isdigit(c))
-		throw (BAD_REQUEST_ERROR);
+		throw HTTPException(BAD_REQUEST_ERROR);
 	_request_line.version += c;
 }
 
@@ -310,7 +319,7 @@ bool trySkipObsFold(std::stringstream &stream)
 			return (true);
 		}
 		else
-			throw BAD_REQUEST_ERROR;
+			throw HTTPException(BAD_REQUEST_ERROR);
 	}
 	return (false);
 }
@@ -369,13 +378,36 @@ std::string tryParseFieldValue(std::stringstream &stream)
 	return (field_value);
 }
 
+bool checkContentLength(std::string value)
+{
+	std::string::iterator it = value.begin();
+	for (; it != value.end(); ++it)
+	{
+		if (!isdigit(*it))
+			return (false);
+	}
+	int val = atoi(value.c_str());
+	if (val < 0)
+		return (false);
+	return (true);
+}
+
 void HTTPRequest::parseHeaderFields(std::stringstream &stream)
 {
 	char		c;
 	std::string	field_name;
 	std::string	field_value;
+	int host_counter = 0;
+	int length_counter = 0;
+
 	while (!(field_name = tryParseToken(stream)).empty())
 	{
+		if (!cmpCaseInsensetive()(field_name, "Host"))
+		{
+			++host_counter;
+			if (host_counter > 1)
+				throw HTTPException(BAD_REQUEST_ERROR);
+		}
 		if ((c = stream.peek()) == ':')
 		{
 			stream.get();
@@ -386,14 +418,22 @@ void HTTPRequest::parseHeaderFields(std::stringstream &stream)
 				stream.get();
 		}
 		else
-			throw BAD_REQUEST_ERROR;
+			throw HTTPException(BAD_REQUEST_ERROR);
+		if (!cmpCaseInsensetive()(field_name, "Content-Length"))
+		{
+			if (!checkContentLength(field_value))
+				throw HTTPException(BAD_REQUEST_ERROR);
+			++length_counter;
+			if (length_counter > 1)
+				throw HTTPException(BAD_REQUEST_ERROR);
+		}
 		_header_fields[field_name] = field_value;
 		stream.get(c);
 		if (c != '\r')
-			throw BAD_REQUEST_ERROR;
+			throw HTTPException(BAD_REQUEST_ERROR);
 		stream.get(c);
 		if (c != '\n')
-			throw BAD_REQUEST_ERROR;
+			throw HTTPException(BAD_REQUEST_ERROR);
 		field_name.clear();
 	}
 }
@@ -433,9 +473,9 @@ Method HTTPRequest::getMethod()
 
 std::string HTTPRequest::getHostField()
 {
-	std::map<std::string, std::string>::iterator it = _header_fields.find("Host");
+	std::map<std::string, std::string, cmpCaseInsensetive>::iterator it = _header_fields.find("Host");
 	if (it == _header_fields.end())
-		throw std::runtime_error("There is no host field in request!");
+		throw HTTPException(BAD_REQUEST_ERROR);
 	std::string host = it->second;
 	size_t i = host.find_first_of(":");
 	if (i != host.npos)

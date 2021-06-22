@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPMessage.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 00:18:35 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/13 04:47:46 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 22:37:19 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,13 @@
 
 #include <string>
 #include <map>
+#include "Utilities.hpp"
 
 class HTTPMessage {
 protected:
-	std::map<std::string, std::string>	_header_fields;
-	std::string							_body;
-	size_t								_uri_max_length;
+	std::map<std::string, std::string, cmpCaseInsensetive>	_header_fields;
+	std::string												_body;
+	size_t													_uri_max_length;
 
 public:
 	HTTPMessage();

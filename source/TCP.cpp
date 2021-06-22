@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 17:17:48 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/21 15:55:21 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/22 21:07:13 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,8 @@ void TCP::closeConnection(int sd)
 std::string TCP::reciveMessage(int sd)
 {
 	// Функция recv тоже блокирующая
-	char buffer[8192] = {0};
-	recv(sd, buffer, 8192, MSG_PEEK);
+	char buffer[262144] = {0};
+	recv(sd, buffer, 262144, MSG_PEEK);
 #ifdef DEBUG
 	std::cout << "Message from SD: " << sd << "\n" << tab_message(std::string(buffer)) << std::endl;
 #endif
