@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:25:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 15:23:45 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/26 22:26:17 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -495,6 +495,22 @@ std::string HTTPRequest::getHostField()
 	if (i != host.npos)
 		return (host.substr(0, i));
 	return (host);
+}
+
+bool HTTPRequest::isChunked()
+{
+	std::map<std::string, std::string, mapCmpCaseInsensetive>::iterator it = _header_fields.find("Transfer-Encoding");
+	if (it == _header_fields.end())
+		return (false);
+	if (it->second == "chunked")
+		return (true);
+	return (false);
+}
+
+void HTTPRequest::changeChunkedToLength()
+{
+	_header_fields["Transfer-Encoding"] = "";
+	_header_fields["Content-Length"] = intToStr(_body.length());
 }
 
 std::string HTTPRequest::getBody()

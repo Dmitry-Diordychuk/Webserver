@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:23:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 01:35:52 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/26 15:56:59 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,11 @@ void HTTPResponse::setBody(std::string body)
 {
 	_body = body;
 	addField("Content-Length", intToStr(body.length()));
+}
+
+void HTTPResponse::addBody(std::string chunk)
+{
+	_body += chunk;
 }
 
 HTTPResponse::HTTPResponse(size_t code, std::string reason)

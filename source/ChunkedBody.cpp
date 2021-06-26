@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/23 17:14:52 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 06:08:56 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/26 22:12:03 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,10 @@ ChunkedBody::~ChunkedBody() {
 	delete _impl;
 }
 
-bool ishex(unsigned char c)
-{
-	return (isdigit(c) || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F');
-}
+// bool ishex(unsigned char c)
+// {
+// 	return ();
+// }
 
 bool istchar(unsigned char c)
 {
@@ -84,7 +84,7 @@ size_t DecodeChunkSize(std::stringstream& input_stream)
 		} break;
 
 		case 1:	{				// if chunk-size exist?
-			if (ishex(c)) {
+			if (isdigit(c) || c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F') {
 				state = 2;
 			} else {
 				state = -1;

@@ -6,7 +6,7 @@
 #    By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/06/01 19:43:52 by kdustin           #+#    #+#              #
-#    Updated: 2021/06/25 04:49:18 by kdustin          ###   ########.fr        #
+#    Updated: 2021/06/26 22:10:14 by kdustin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ SRC_DIR := ./source
 SRCS := File.cpp HTTPException.cpp HTTPMessage.cpp HTTPRequest.cpp \
 	HTTPResponse.cpp Location.cpp main.cpp Method.cpp Path.cpp Config.cpp \
 	Server.cpp TCP.cpp URI.cpp Utilities.cpp VirtualServer.cpp HTMLGenerator.cpp \
-	Directory.cpp Task.cpp get_next_line.cpp get_next_line_utils.cpp ParseConfig.cpp
+	Directory.cpp Task.cpp get_next_line.cpp get_next_line_utils.cpp ParseConfig.cpp ChunkedBody.cpp
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 

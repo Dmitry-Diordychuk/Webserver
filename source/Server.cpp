@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:52:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 15:39:14 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/26 22:24:34 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,26 @@ void Server::start()
 						{
 							// Парсинг запроса
 							request.parseRequest(message);
+
+							if (request.isChunked())
+							{
+								ChunkedBody chunked_body;
+								chunked_body.decode(request.getBody());
+								while (chunked_body.getState() != Complete && chunked_body.getState() != Error)
+								{
+									std::stringstream chunk;
+									chunk << TCP::reciveMessage(tasks[i]->getFD());
+									chunked_body.decode(chunk.str());
+								}
+								if (chunked_body.getState() == Complete)
+								{
+									request.setBody((std::string)chunked_body);
+									request.changeChunkedToLength();
+								}
+								else
+									HTTPException(BAD_REQUEST_ERROR);
+							}
+
 							// Обработать запрос и сформировать задачу
 							_config.getVirtualServerAt(tasks[i]->getVServIndex(),
 														request.getHostField()).processRequest(request, tasks[i]);

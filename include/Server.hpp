@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:34:22 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/16 21:32:38 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/26 16:01:11 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include "HTTPResponse.hpp"
 #include "Task.hpp"
 #include "HTMLGenerator.hpp"
+#include "ChunkedBody.hpp"
 #include <poll.h>
 
 class Server
