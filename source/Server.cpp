@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:52:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 21:55:31 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 15:39:14 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,11 @@ void Server::start()
 						catch(const HTTPException& e)
 						{
 							_config.getVirtualServerAt(0, "").formErrorTask(tasks[i], e.getCode(), e.getMessage());
-							continue ;
+							if (tasks[i]->job() != GENERATE_ERROR_PAGE)
+								continue ;
 						}
 
-						if (tasks[i]->job() == AUTOINDEX)
+						if (tasks[i]->job() == AUTOINDEX || tasks[i]->job() == GENERATE_ERROR_PAGE)
 						{
 							TCP::sendMessage(tasks[i]->getFD(), tasks[i]->doJob().toStr());
 							TCP::closeConnection(tasks[i]->getFD());

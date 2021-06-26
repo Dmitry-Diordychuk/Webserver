@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 02:35:09 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 22:15:42 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 15:19:58 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,12 @@
 
 #include <sstream>
 #include <functional>
+#include <algorithm>
 
 std::string intToStr(size_t val);
 std::string trim(std::string str);
 
-struct cmpCaseInsensetive {
+struct mapCmpCaseInsensetive {
 	bool operator()(const std::string& a, const std::string& b) const;
 };
 

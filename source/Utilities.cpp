@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 02:36:25 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 22:44:41 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 15:30:13 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,14 @@ std::string trim(std::string str)
 	return (str.substr(i, j - i));
 }
 
-bool cmpCaseInsensetive::operator()(const std::string& a, const std::string& b) const {
-	std::string::const_iterator ita = a.begin();
-	std::string::const_iterator itb = b.begin();
-	for (; ita != a.end() && itb != b.end(); ++ita, ++itb)
-	{
-		if (std::tolower(*ita) != std::tolower(*itb))
-			return (true);
-	}
-	if (ita != a.end() || itb != b.end())
-		return (true);
-	return (false);
+bool mapCmpCaseInsensetive::operator()(const std::string& a, const std::string& b) const {
+	std::string la;
+	std::string lb;
+	std::string::const_iterator it = a.begin();
+	for (; it != a.end(); ++it)
+		la += std::tolower(*it);
+	it = b.begin();
+	for (; it != b.end(); ++it)
+		lb += std::tolower(*it);
+	return (std::lexicographical_compare(la.begin(), la.end(), lb.begin(), lb.end()));
 }

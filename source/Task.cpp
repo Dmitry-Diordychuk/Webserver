@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/16 00:07:22 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 18:19:05 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 15:36:09 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,10 +190,13 @@ HTTPResponse Task::doJob()
 	}
 	else if (_job == DELETE_FILE)
 		_file->deleteFile();
-	// else if (task.getTodo() == DEFAULT_ERROR)
-	// 	response.setBody()           // Ошибка генерировать
-
-
+	else if (_job == GENERATE_ERROR_PAGE)
+	{
+		_response.addField("Last-Modified", getCurrentTime());
+	 	_response.setBody("<h1>" + intToStr(_response.getCode()) + " " + _response.getReason()  + "</h1>");
+		_response.addField("Content-Type", "text/html");
+		_response.addField("Connection", "Closed");
+	}
 	return (_response);
 }
 

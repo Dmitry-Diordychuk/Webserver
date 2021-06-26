@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 16:18:43 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 19:30:06 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/26 15:33:44 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,11 @@ VirtualServer::VirtualServer(std::string server_name, std::string ip, size_t por
 
 VirtualServer::~VirtualServer() {}
 
-void VirtualServer::setErrorPage(std::string page) {_error_page = page;}
+void VirtualServer::addErrorPage(int code, std::string path)
+{
+	_error_pages[code] = path;
+}
+
 void VirtualServer::setMaxBodySize(size_t size) {_client_max_body_size = size;}
 
 std::string VirtualServer::getServerName()
@@ -53,11 +57,10 @@ void VirtualServer::addLocation(Location location) {
 
 void VirtualServer::formErrorTask(Task* task, size_t code, std::string reason)
 {
-	// Выбор в зависимости от кода ошибки добавить
-	File* error_file = new File(_error_page, false);
+	File* error_file = new File(_error_pages[code], false);
 	if (!error_file->isOpen())
 	{
-		task->changeJob(DEFAULT_ERROR, HTTPResponse(code, reason));
+		task->changeJob(GENERATE_ERROR_PAGE, HTTPResponse(code, reason));
 		return ;
 	}
 	task->changeJob(GET_FILE_CONTENT, error_file, HTTPResponse(code, reason));
@@ -83,12 +86,9 @@ void VirtualServer::processRequest(HTTPRequest request, Task* task)
 					formErrorTask(task, 413, "Request Entity Too Large");
 					return ;
 				}
-				File *file = new File(response_path.toStr(), true); //???????????
+				File *file = new File(response_path.toStr(), true);
 				if (!file->isOpen())
 				{
-#ifdef DEBUG
-					std::cout << "Post file error!" << std::endl;
-#endif // !DEBUG
 					formErrorTask(task, 500, "Internal Server Error");
 					return ;
 				}

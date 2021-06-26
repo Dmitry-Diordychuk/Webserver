@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:25:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 00:22:34 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 15:23:45 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -392,6 +392,20 @@ bool checkContentLength(std::string value)
 	return (true);
 }
 
+bool cmpCaseInsensetive(const std::string& a, const std::string& b)
+{
+	std::string::const_iterator ita = a.begin();
+	std::string::const_iterator itb = b.begin();
+	for (; ita != a.end() && itb != b.end(); ++ita, ++itb)
+	{
+		if (std::tolower(*ita) != std::tolower(*itb))
+			return (false);
+	}
+	if (ita != a.end() || itb != b.end())
+		return (false);
+	return (true);
+}
+
 void HTTPRequest::parseHeaderFields(std::stringstream &stream)
 {
 	char		c;
@@ -402,7 +416,7 @@ void HTTPRequest::parseHeaderFields(std::stringstream &stream)
 
 	while (!(field_name = tryParseToken(stream)).empty())
 	{
-		if (!cmpCaseInsensetive()(field_name, "Host"))
+		if (cmpCaseInsensetive(field_name, "host"))
 		{
 			++host_counter;
 			if (host_counter > 1)
@@ -419,7 +433,7 @@ void HTTPRequest::parseHeaderFields(std::stringstream &stream)
 		}
 		else
 			throw HTTPException(BAD_REQUEST_ERROR);
-		if (!cmpCaseInsensetive()(field_name, "Content-Length"))
+		if (cmpCaseInsensetive(field_name, "Content-Length"))
 		{
 			if (!checkContentLength(field_value))
 				throw HTTPException(BAD_REQUEST_ERROR);
@@ -473,7 +487,7 @@ Method HTTPRequest::getMethod()
 
 std::string HTTPRequest::getHostField()
 {
-	std::map<std::string, std::string, cmpCaseInsensetive>::iterator it = _header_fields.find("Host");
+	std::map<std::string, std::string, mapCmpCaseInsensetive>::iterator it = _header_fields.find("Host");
 	if (it == _header_fields.end())
 		throw HTTPException(BAD_REQUEST_ERROR);
 	std::string host = it->second;

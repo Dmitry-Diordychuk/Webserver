@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 00:18:35 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 22:37:19 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 15:20:47 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 class HTTPMessage {
 protected:
-	std::map<std::string, std::string, cmpCaseInsensetive>	_header_fields;
+	std::map<std::string, std::string, mapCmpCaseInsensetive>	_header_fields;
 	std::string												_body;
 	size_t													_uri_max_length;
 

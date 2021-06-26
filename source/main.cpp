@@ -6,19 +6,67 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 19:55:24 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 19:19:32 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/25 15:19:03 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "Server.hpp"
 #include "VirtualServer.hpp"
+#include "ParseConfig.hpp"
 
 int main()
 {
+	// ParseConfig start;
+	// start.ParseConf();
+
+	// Config conf;
+	// for (size_t i = 0; i < start.getServInfo().size(); ++i)
+	// {
+	// 	ParseConfig* server_info = start.getServInfo()[i];
+	// 	std::map<std::string, std::string> head_fields = server_info->getMapHeadFields();
+	// 	VirtualServer server(head_fields["host"], "", atoi(head_fields["port"].c_str()));
+
+	// 	server.setMaxBodySize(atoi(head_fields["max_body_size"].c_str()));
+
+	// 	std::map<std::string, std::string> error_pages = server_info->getErrorPages();
+	// 	std::map<std::string, std::string>::iterator error_it = error_pages.begin();
+	// 	for (; error_it != error_pages.end(); ++error_it)
+	// 		server.addErrorPage(atoi(error_it->first.c_str()), error_it->second);
+
+	// 	size_t loc_size = server_info->getLocPath().size();
+	// 	for (size_t j = 0; j < loc_size; ++j)
+	// 	{
+	// 		std::string location_path = server_info->getValueLocPath()[j];
+	// 		Location location(location_path);
+
+	// 		location.setRoot( server_info->getMapLoc()[location_path]["root"] );
+	// 		location.setIndex( server_info->getMapLoc()[location_path]["index"] );
+
+	// 		std::vector<Method> methods;
+	// 		for (
+	// 			size_t k = 0; server_info->getMethods()[loc_size].find(k) !=
+	// 						  server_info->getMethods()[loc_size].end(); ++k
+	// 		) {
+	// 			methods.push_back(strToMethod(server_info->getMethods()[loc_size][k]));
+	// 		}
+	// 		location.setAllowedMethods(methods);
+
+	// 		location.setCgi( server_info->getMapLoc()[location_path]["cgi_extension"] );
+	// 		if (server_info->getMapLoc()[location_path]["autoindex"] == "on")
+	// 			location.setAutoindex(true);
+	// 		else
+	// 			location.setAutoindex(false);
+
+	// 		server.addLocation(location);
+	// 	}
+	// 	conf.addVirtualServer(server);
+	// }
+	// conf.setMaxSockets(1000000);
+	// conf.socketTimeout(1);
 
 	VirtualServer virtserver_localhost("localhost", "", 8080);
-	virtserver_localhost.setErrorPage("./../test/www/error404.html");
+	virtserver_localhost.addErrorPage(404, "./../test/www/error404.html");
 
 	std::vector<Method> methods_default;
 	methods_default.push_back(GET);

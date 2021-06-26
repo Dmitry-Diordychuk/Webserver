@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 23:57:01 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 18:12:58 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/23 01:32:03 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,14 @@
 #include <poll.h>
 #include <vector>
 #include <ctime>
+#include "Utilities.hpp"
 
 enum Job{
 	LISTEN,
 	RECEIVE_REQUEST,
 	GET_FILE_CONTENT,
 	AUTOINDEX,
-	DEFAULT_ERROR,
+	GENERATE_ERROR_PAGE,
 	EMPTY_BODY,
 	UPLOAD,
 	DELETE_FILE
