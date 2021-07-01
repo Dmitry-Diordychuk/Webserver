@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 17:17:48 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 16:29:40 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/01 08:48:32 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,22 @@ std::string tab_message(std::string message)
 TCP::TCP() {}
 TCP::~TCP() {}
 
+
+/*
+	{
+	timeval tv;
+	tv.tv_sec = static_cast<long>(read_timeout_sec_);
+	tv.tv_usec = static_cast<decltype(tv.tv_usec)>(read_timeout_usec_);
+	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
+	}
+	{
+	timeval tv;
+	tv.tv_sec = static_cast<long>(write_timeout_sec_);
+	tv.tv_usec = static_cast<decltype(tv.tv_usec)>(write_timeout_usec_);
+	setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, sizeof(tv));
+	}
+*/
+
 int TCP::createConnectionSocket()
 {
 	int sd;
@@ -39,6 +55,7 @@ int TCP::createConnectionSocket()
 	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
 	std::cout << "Server SD: " << sd << std::endl;
 #endif
+	fcntl(sd, F_SETFL, O_NONBLOCK);
 	return (sd);
 }
 
@@ -83,6 +100,7 @@ int TCP::acceptConnection(int sd)
 							);
 	if (new_socket < 0)
 		throw std::runtime_error("Accept: " + std::string(strerror(errno)));
+	fcntl(new_socket, F_SETFL, O_NONBLOCK);
 #ifdef DEBUG
 	std::cout << "Server " << sd << " has accepted new conection SD: " << new_socket << std::endl;
 #endif
@@ -101,8 +119,8 @@ void TCP::closeConnection(int sd)
 std::string TCP::reciveMessage(int sd)
 {
 	// Функция recv тоже блокирующая
-	char buffer[262144] = {0};
-	recv(sd, buffer, 262144, MSG_PEEK);
+	char buffer[MAX_HTTP] = {0};
+	recv(sd, buffer, MAX_HTTP, MSG_PEEK);
 #ifdef DEBUG
 	std::cout << "Message from SD: " << sd << "\n" << tab_message(std::string(buffer)) << std::endl;
 #endif
@@ -113,6 +131,10 @@ void TCP::sendMessage(int sd, std::string message)
 {
 #ifdef DEBUG
 	std::cout << "Send message to SD: " << sd << "\n" << tab_message(message) << std::endl;
-#endif
+	int state = send(sd, message.c_str(), message.length(), 0);
+	if (state < 0)
+		std::cout << "Send error: " << strerror(errno) << std::endl;
+#else
 	send(sd, message.c_str(), message.length(), 0);
+#endif
 }

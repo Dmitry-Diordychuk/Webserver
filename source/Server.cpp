@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:52:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 22:24:34 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/01 09:11:13 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ void Server::start()
 		for (size_t i = 0; i < _config.size(); ++i)
 		{
 			int server_sd = TCP::createConnectionSocket();
-			fcntl(server_sd, F_SETFL, O_NONBLOCK);
 			TCP::bindConnectionSocket(server_sd, _config.getIpAt(i), _config.getPortAt(i));
 			TCP::startListen(server_sd, _config.getMaxSockets());
 			tasks.push_back(new Task(LISTEN, server_sd));
@@ -94,10 +93,12 @@ void Server::start()
 
 						if (tasks[i]->job() == AUTOINDEX || tasks[i]->job() == GENERATE_ERROR_PAGE)
 						{
-							TCP::sendMessage(tasks[i]->getFD(), tasks[i]->doJob().toStr());
+							TCP::sendMessage(tasks[i]->getFD(), (std::string)tasks[i]->doJob());
 							TCP::closeConnection(tasks[i]->getFD());
+							Task* task = tasks[i];
 							tasks.erase(tasks.begin() + i);
 							--i;
+							delete task;
 						}
 					}
 					else
@@ -105,11 +106,22 @@ void Server::start()
 						// Выполнить задачу
 						HTTPResponse response = tasks[i]->doJob();
 
-						// Отправить ответ
-						TCP::sendMessage(tasks[i]->returnFD(), response.toStr());
+						std::string message = (std::string)response;
+						size_t n = message.length() / MAX_HTTP;
+						size_t reminded = message.length() % MAX_HTTP;
+						size_t offset = 0;
+						for (size_t j = 0; j < n; ++j)
+						{
+							TCP::sendMessage(tasks[i]->returnFD(), message.substr(offset, MAX_HTTP));
+							offset += MAX_HTTP;
+						}
+						TCP::sendMessage(tasks[i]->returnFD(), message.substr(offset, reminded));
+
 						TCP::closeConnection(tasks[i]->returnFD());
+						Task* task = tasks[i];
 						tasks.erase(tasks.begin() + i);
 						--i;
+						delete task;
 					}
 				}
 			}

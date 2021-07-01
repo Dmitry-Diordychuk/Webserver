@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 15:47:30 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 18:37:42 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 22:40:25 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ std::string Location::getIndex()
 
 std::string Location::getPrefix()
 {
-	return (_prefix.toStr());
+	return ((std::string)_prefix);
 }
 
 bool Location::autoindex()
@@ -89,7 +89,7 @@ std::string Location::getUploadPath(Path request_path)
 		result.addSegment(*it_req);
 	result.setIsDirectory(false);
 	result.setIsEmpty(false);
-	return (result.toStr());
+	return ((std::string)result);
 }
 
 size_t Location::getMaxBodySize()

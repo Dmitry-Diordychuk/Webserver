@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/16 00:07:22 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 15:36:09 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 06:31:21 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,9 @@ Task& Task::operator=(const Task& rhs)
 }
 
 Task::~Task() {
+#ifdef DEBUG
+	std::cout << "Task deleted" << std::endl;
+#endif
 	delete _dir;
 	delete _file;
 }
@@ -133,12 +136,13 @@ void Task::changeJob(Job new_job, File *file, HTTPResponse message)
 	_pollfd.revents = 1;
 }
 
-void Task::changeJob(Job new_job, Directory *dir, HTTPResponse message)
+void Task::changeJob(Job new_job, Directory *dir, std::string servpath, HTTPResponse message)
 {
 	_job = new_job;
 	_dir = dir;
 	_job = AUTOINDEX;
 	_response = message;
+	_server_path = servpath;
 }
 
 void Task::changeJob(Job new_job, File *file, std::string servpath, std::string content, HTTPResponse message)
@@ -172,14 +176,14 @@ HTTPResponse Task::doJob()
 		if (_job == GET_FILE_CONTENT)
 			_response.setBody(_file->getContent());
 		else if (_job == EMPTY_BODY)
-			_response.addField("Content-Length", intToStr(_file->getContent().length()));
+			_response.addField("Content-Length", convertNumtoStr(_response.bodyLength()));
 		_response.addField("Content-Type", _file->getType());
 		_response.addField("Connection", "Closed");
 	}
 	else if (_job == AUTOINDEX)
 	{
 		_response.addField("Last-Modified", getCurrentTime());
-	 	_response.setBody(HTMLGenerator::Autoindex(_dir));
+	 	_response.setBody(HTMLGenerator::Autoindex(_dir, _server_path));
 		_response.addField("Content-Type", "text/html");
 		_response.addField("Connection", "Closed");
 	}
@@ -193,7 +197,7 @@ HTTPResponse Task::doJob()
 	else if (_job == GENERATE_ERROR_PAGE)
 	{
 		_response.addField("Last-Modified", getCurrentTime());
-	 	_response.setBody("<h1>" + intToStr(_response.getCode()) + " " + _response.getReason()  + "</h1>");
+	 	_response.setBody("<h1>" + convertNumtoStr(_response.getCode()) + " " + _response.getReason()  + "</h1>");
 		_response.addField("Content-Type", "text/html");
 		_response.addField("Connection", "Closed");
 	}

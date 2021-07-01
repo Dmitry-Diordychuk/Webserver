@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 19:21:03 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 19:28:55 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/30 22:17:18 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,11 +68,6 @@ bool Directory::isDir()
 bool Directory::isOpen()
 {
 	return (_is_open);
-}
-
-int Directory::getFD()
-{
-	return (_dir->__dd_fd);
 }
 
 std::string Directory::getPath()

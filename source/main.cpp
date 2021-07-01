@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 19:55:24 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/25 15:19:03 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 22:05:07 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,11 @@
 #include "VirtualServer.hpp"
 #include "ParseConfig.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
+	if (argc < 2)
+		std::cout << "Using example: webserv configuration_file";
+	(void)argv;
 	// ParseConfig start;
 	// start.ParseConf();
 

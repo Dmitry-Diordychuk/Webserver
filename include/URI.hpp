@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   URI.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:48:06 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/12 14:36:37 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 22:39:37 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ public:
 	void	setPath(Path path);
 	void	setQuery(std::string params);
 	size_t	length();
-	// std::string toStr();
 };
 
 #endif // __URI_H__

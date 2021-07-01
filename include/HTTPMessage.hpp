@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 00:18:35 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 15:20:47 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 23:52:51 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 class HTTPMessage {
 protected:
 	std::map<std::string, std::string, mapCmpCaseInsensetive>	_header_fields;
-	std::string												_body;
-	size_t													_uri_max_length;
+	std::string													_body;
+	size_t														_uri_max_length;
 
 public:
 	HTTPMessage();
@@ -30,12 +30,14 @@ public:
 	~HTTPMessage();
 
 	void addField(std::string name, std::string value);
+	void deleteField(std::string name);
 	void setBody(std::string body);
 	void setUriMaxLength(size_t len);
+	std::string getHeaderFields();
 
 	size_t bodyLength();
 
-	std::string toStr();
+	operator std::string();
 };
 
 #endif // HTTPMessage

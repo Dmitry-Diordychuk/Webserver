@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 16:18:43 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 16:13:18 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 22:41:56 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void VirtualServer::processRequest(HTTPRequest request, Task* task)
 					formErrorTask(task, 413, "Request Entity Too Large");
 					return ;
 				}
-				File *file = new File(response_path.toStr(), true);
+				File *file = new File((std::string)response_path, true);
 				if (!file->isOpen())
 				{
 					formErrorTask(task, 500, "Internal Server Error");
@@ -100,7 +100,7 @@ void VirtualServer::processRequest(HTTPRequest request, Task* task)
 			}
 			else if (request.getMethod() == DELETE)
 			{
-				File* file = new File(response_path.toStr(), false);
+				File* file = new File((std::string)response_path, false);
 				if (!file->isOpen())
 				{
 					formErrorTask(task, 404, "Not Found");
@@ -109,9 +109,9 @@ void VirtualServer::processRequest(HTTPRequest request, Task* task)
 				task->changeJob(DELETE_FILE, file, HTTPResponse(200, "OK"));
 				return ;
 			}
-			else if (it->autoindex() && (response_path.directory() || Directory::str_is_dir(response_path.toStr())))
+			else if (it->autoindex() && (response_path.directory() || Directory::str_is_dir((std::string)response_path)))
 			{
-				task->changeJob(AUTOINDEX, new Directory(response_path.toStr()), HTTPResponse(200, "OK"));
+				task->changeJob(AUTOINDEX, new Directory((std::string)response_path), (std::string)request.getPath(), HTTPResponse(200, "OK"));
 				return ;
 			}
 			else
@@ -119,7 +119,7 @@ void VirtualServer::processRequest(HTTPRequest request, Task* task)
 				response_path.addSegment(it->getIndex());
 				if (!it->getIndex().empty())
 					response_path.setIsDirectory(false);
-				File* file = new File(response_path.toStr(), false);
+				File* file = new File((std::string)response_path, false);
 				if (!file->isOpen())
 				{
 					formErrorTask(task, 404, "Not Found");

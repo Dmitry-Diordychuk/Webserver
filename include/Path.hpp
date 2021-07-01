@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 22:17:07 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 16:44:42 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 22:39:27 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ public:
 	void		addSegment(std::string segment);
 	bool		findSegment(Path path, Path::iterator& output_it);
 	size_t		length();
-	std::string	toStr();
+	operator 	std::string();
 };
 
 #endif // __PATH_H__

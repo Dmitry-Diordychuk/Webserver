@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 19:20:42 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 19:28:29 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/30 22:17:09 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ public:
 	std::string getNextName();
 	bool isDir();
 	bool isOpen();
-	int getFD();
 	std::string getPath();
 
 	static bool str_is_dir(std::string path);

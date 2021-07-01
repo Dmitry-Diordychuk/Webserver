@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:25:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 22:26:17 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 06:29:59 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -510,7 +510,7 @@ bool HTTPRequest::isChunked()
 void HTTPRequest::changeChunkedToLength()
 {
 	_header_fields["Transfer-Encoding"] = "";
-	_header_fields["Content-Length"] = intToStr(_body.length());
+	_header_fields["Content-Length"] = convertNumtoStr(_body.length());
 }
 
 std::string HTTPRequest::getBody()

@@ -6,13 +6,13 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 02:36:25 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 15:30:13 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 06:29:58 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utilities.hpp"
 
-std::string intToStr(size_t val)
+std::string convertNumtoStr(size_t val)
 {
 	std::stringstream convert;
 	convert << val;

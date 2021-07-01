@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:23:05 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 15:56:59 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/01 01:01:56 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,28 @@ void HTTPResponse::setStatusLine(std::string ver, size_t code, std::string phras
 void HTTPResponse::setBody(std::string body)
 {
 	_body = body;
-	addField("Content-Length", intToStr(body.length()));
+	addField("Content-Length", convertNumtoStr(body.length()));
 }
 
-void HTTPResponse::addBody(std::string chunk)
+void HTTPResponse::setAsChunked()
 {
-	_body += chunk;
+	addField("Transfer-Encoding", "chunked");
+	deleteField("Content-Length");
+}
+
+std::string HTTPResponse::getHeader()
+{
+	std::string head;
+	head += _status_line.http_version + ' ';
+	head += convertNumtoStr(_status_line.status_code) + ' ';
+	head += _status_line.reason_phrase + "\r\n";
+	head += HTTPMessage::getHeaderFields();
+	return (head);
+}
+
+std::string& HTTPResponse::getBody()
+{
+	return (_body);
 }
 
 HTTPResponse::HTTPResponse(size_t code, std::string reason)
@@ -40,13 +56,12 @@ HTTPResponse::HTTPResponse(size_t code, std::string reason)
 	_status_line.reason_phrase = reason;
 }
 
-std::string HTTPResponse::toStr()
-{
+HTTPResponse::operator std::string() {
 	std::string message;
 	message += _status_line.http_version + ' ';
-	message += intToStr(_status_line.status_code) + ' ';
+	message += convertNumtoStr(_status_line.status_code) + ' ';
 	message += _status_line.reason_phrase + "\r\n";
-	message += HTTPMessage::toStr();
+	message += HTTPMessage::operator std::__1::string();
 	return (message);
 }
 

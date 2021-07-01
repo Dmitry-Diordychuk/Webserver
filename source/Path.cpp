@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 22:23:29 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 20:26:49 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 22:39:16 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,7 @@ size_t Path::length()
 	return (_len);
 }
 
-std::string Path::toStr()
-{
+Path::operator std::string() {
 	if (_is_empty)
 		return (std::string());
 	std::string path;

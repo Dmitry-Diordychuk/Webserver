@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:37:30 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/22 18:18:36 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/29 06:19:11 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,29 +15,13 @@
 File::File(){}
 
 File::File(std::string path, bool read)
-	: _buffer(256)
 {
-	char_type *start = &_buffer.front();
-	char_type *end = start + _buffer.size();
-	setg(start, end, end);
 	openFile(path, read);
 }
 
 File::~File()
 {
 	closeFile();
-}
-
-int File::underflow()
-{
-	if (!_is_open)
-		return traits_type::eof();
-	if (gptr() < egptr())
-		return (*gptr());
-	char_type *start = eback();
-	size_t rd = read(_fd, start, _buffer.size());
-	setg(start, start, start + rd);
-	return (rd > 0 ? *gptr() : traits_type::eof());
 }
 
 bool File::openFile(std::string path, bool read)
@@ -78,7 +62,11 @@ bool File::openFile(std::string path, bool read)
 	std::strftime(mbstr, sizeof(mbstr), "%a, %d %b %Y %H:%M:%S GMT", std::gmtime(&mod_t));
 	_last_mod_time = std::string(mbstr);
 	//fcntl(_fd, F_SETFL, O_NONBLOCK); //сбрасывает O_APPEND?
-	_type = "text/" + path.substr(path.find_last_of(".") + 1);
+	std::string extension = path.substr(path.find_last_of(".") + 1);
+	if (extension == "html")
+		_type = "text/" + extension;
+	else if (extension == "gif")
+		_type = "image/" + extension;
 	return (_is_open = true);
 }
 
@@ -100,14 +88,15 @@ int File::getFD()
 
 std::string File::getContent()
 {
-	std::string line;
 	std::string result;
 	if (_is_open)
 	{
-		std::istream in(this);
+		FDBuffer buff(_fd);
+		std::istream in(&buff);
 
-		while (std::getline(in, line))
-			result += line;
+		char c;
+		while (in.get(c))
+			result += c;
 	}
 	return (result);
 }

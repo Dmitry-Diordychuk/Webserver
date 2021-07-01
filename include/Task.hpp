@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Task.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 23:57:01 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 16:13:11 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/27 00:52:21 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ public:
 	Job job();
 	void changeJob(Job new_job, HTTPResponse message);
 	void changeJob(Job new_job, File *file, HTTPResponse message);
-	void changeJob(Job new_job, Directory *dir, HTTPResponse message);
+	void changeJob(Job new_job, Directory *dir, std::string uri, HTTPResponse message);
 	void changeJob(Job new_job, File *file, std::string servpath, std::string content, HTTPResponse message);
 	HTTPResponse doJob();
 

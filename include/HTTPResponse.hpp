@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:22:09 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/26 15:56:14 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/06/30 02:48:40 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,11 @@ public:
 
 	void setStatusLine(std::string ver, size_t code, std::string phrase);
 	void setBody(std::string body);
-	void addBody(std::string chunk);
-	std::string toStr();
+	void setAsChunked();
+	std::string getHeader();
+	std::string& getBody();
+
+	operator std::string();
 
 	size_t getCode();
 	std::string getReason();
