@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:34:22 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/30 02:09:15 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/02 00:18:36 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@
 #include <string>
 
 #include "Config.hpp"
-#include "TCP.hpp"
+#include "ConnectionSocket.hpp"
+#include "Descriptors.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 #include "Task.hpp"

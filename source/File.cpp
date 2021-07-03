@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/05 01:37:30 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/29 06:19:11 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/02 23:47:03 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,14 @@ File::File(){}
 File::File(std::string path, bool read)
 {
 	openFile(path, read);
+	_signal = new Signal();
 }
 
 File::~File()
 {
 	closeFile();
+	delete _signal;
+	_signal = NULL;
 }
 
 bool File::openFile(std::string path, bool read)
@@ -127,4 +130,26 @@ std::string File::getLastModTime()
 bool File::wasCreated()
 {
 	return (_was_created);
+}
+
+bool File::readReady() {
+	return (_signal->readReady());
+}
+
+bool File::writeReady() {
+	return (_signal->writeReady());
+}
+
+Signal* File::getSignal() {
+	return (_signal);
+}
+
+void File::setUriPath(std::string uri_path)
+{
+	_uri_path = uri_path;
+}
+
+std::string File::getUriPath()
+{
+	return (_uri_path);
 }

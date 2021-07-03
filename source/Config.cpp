@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 02:04:04 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 03:00:10 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/02 23:38:40 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,16 +66,22 @@ size_t Config::getSocketTimeout()
 	return (_socket_timeout);
 }
 
-VirtualServer Config::getVirtualServerAt(size_t index, std::string host_server_name)
+VirtualServer* Config::getVirtualServer(ClientSocket *socket, std::string host_server_name)
 {
-	if (host_server_name.empty())
-		return (*_virservers.at(index).begin());
-	std::vector<VirtualServer> servers_list = _virservers.at(index);
-	std::vector<VirtualServer>::iterator it = servers_list.begin();
-	for (; it != servers_list.end(); ++it)
+	for (size_t i = 0; i < _virservers.size(); ++i)
 	{
-		if ((*it).getServerName() == host_server_name)
-			return (*it);
+		if (_virservers[i][0].getIp() == socket->getIp() && _virservers[i][0].getPort() == socket->getPort())
+		{
+			if (host_server_name.empty()) {
+				return (&_virservers[i][0]);
+			} else {
+				for (size_t j = 0; j < _virservers[i].size(); ++j)
+				{
+					if (_virservers[i][j].getServerName() == host_server_name)
+						return (&_virservers[i][j]);
+				}
+			}
+		}
 	}
-	return (*servers_list.begin());
+	return (&_virservers[0][0]);
 }

@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/08 14:41:17 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/15 02:37:00 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/02 00:24:04 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define __CONFIG_HPP__
 
 #include "VirtualServer.hpp"
+#include "ClientSocket.hpp"
 #include <string>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
 	void setMaxSockets(size_t max_sockets);
 	void socketTimeout(size_t soket_timeout);
 
-	VirtualServer getVirtualServerAt(size_t index, std::string host_server_name);
+	VirtualServer* getVirtualServer(ClientSocket *socket, std::string host_server_name);
 	std::string getIpAt(size_t index);
 	size_t getPortAt(size_t index);
 	size_t size();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Task.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdustin <kdustin@student.21-school.ru>     +#+  +:+       +#+        */
+/*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 23:57:01 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/27 00:52:21 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/02 21:43:40 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,22 @@
 #include "HTMLGenerator.hpp"
 #include "Directory.hpp"
 #include "File.hpp"
+#include "Utilities.hpp"
+#include "ClientSocket.hpp"
 #include <poll.h>
 #include <vector>
 #include <ctime>
-#include "Utilities.hpp"
 
 enum Job{
-	LISTEN,
-	RECEIVE_REQUEST,
-	GET_FILE_CONTENT,
-	AUTOINDEX,
-	GENERATE_ERROR_PAGE,
-	EMPTY_BODY,
-	UPLOAD,
-	DELETE_FILE
+	SocketRead,
+	SocketWrite,
+	ProcessRequest,
+	GetFileContent,
+	UploadFile,
+	DeleteFile,
+	GenerateAutoindexPage,
+	GenerateErrorPage,
+	SendEmptyBody
 };
 
 class Task
@@ -38,41 +40,27 @@ class Task
 private:
 	HTTPResponse 	_response;
 	Job				_job;
-	File			*_file;
-	Directory		*_dir;
-	size_t			_vserv_index;
-	pollfd			_pollfd;
-	pollfd			_return_fd;
-
-	//Upload
+	void			*_target;
 	std::string		_storage;
-	std::string		_server_path;
+	ClientSocket	*_socket;
+
+	void deleteContent();
 
 public:
-	Task();
-	Task(Job job, size_t socket);
-	Task(Job job, size_t socket, size_t server_index);
+	Task(Job job, HTTPResponse response, void *target, std::string info, ClientSocket *socket);
 	Task(const Task&);
 	Task& operator=(const Task&);
 	~Task();
 
-	//static void pollJobs(std::vector<Task*> tasks);
+	bool	contentReady();
 
-	bool	readyToRead();
-	bool	readyToWrite();
-
-	int		getFD();
-	int		returnFD();
-	size_t	getVServIndex();
-
+	void changeJob(Job job, HTTPResponse response, void *target, std::string info);
 	Job job();
-	void changeJob(Job new_job, HTTPResponse message);
-	void changeJob(Job new_job, File *file, HTTPResponse message);
-	void changeJob(Job new_job, Directory *dir, std::string uri, HTTPResponse message);
-	void changeJob(Job new_job, File *file, std::string servpath, std::string content, HTTPResponse message);
+	void *getTarget();
 	HTTPResponse doJob();
 
-	pollfd& getPollfd();
+	std::string& getStorage();
+	ClientSocket *getSocket();
 };
 
 #endif // __TASK_H__

@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 14:52:15 by kdustin           #+#    #+#             */
-/*   Updated: 2021/07/01 09:11:13 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/03 02:04:36 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,111 +24,124 @@ void Server::start()
 {
 	try
 	{
-		std::vector<Task*> tasks;
+		//std::vector<Task*> tasks;
+		Descriptors descriptors;
+		std::vector<ConnectionSocket*> servers;
 		// Инициализация сокетов
 		for (size_t i = 0; i < _config.size(); ++i)
 		{
-			int server_sd = TCP::createConnectionSocket();
-			TCP::bindConnectionSocket(server_sd, _config.getIpAt(i), _config.getPortAt(i));
-			TCP::startListen(server_sd, _config.getMaxSockets());
-			tasks.push_back(new Task(LISTEN, server_sd));
+			ConnectionSocket *connection_socket = new ConnectionSocket();
+			connection_socket->listen(_config.getIpAt(i), _config.getPortAt(i));
+			descriptors.add(connection_socket);
+			servers.push_back(connection_socket);
 		}
 
+		std::vector<Task*> tasks;
 		// Основной цикл
 		while (1)
 		{
-			// Для каждого набора серверных сокетов.
+			descriptors.poll();
+
+			// Установить новые TCP соединения
+			ClientSocket *client_socket;
+			for (size_t i = 0; i < servers.size(); ++i)
+			{
+				if ((client_socket = servers[i]->accept()))
+				{
+					descriptors.add(client_socket);
+					tasks.push_back(new Task(SocketRead, HTTPResponse(), NULL, "", client_socket));
+				}
+			}
+
+
 			for (size_t i = 0; i < tasks.size(); ++i)
 			{
-				poll(&tasks[i]->getPollfd(), 1, 1);
-				if (tasks[i]->readyToRead() || tasks[i]->readyToWrite())
+				// Принять запросы
+				if (tasks[i]->job() == SocketRead)
 				{
-					if (tasks[i]->job() == LISTEN)
+					ClientSocket *socket = tasks[i]->getSocket();
+					if (socket->readReady())
 					{
-						// Устанавливает TCP соединение.
-						int new_socket = TCP::acceptConnection(tasks[i]->getFD());
-						tasks.push_back(new Task(RECEIVE_REQUEST, new_socket, i));
+						if (socket->read(tasks[i]->getStorage()))
+						{
+							// Чтение законченно
+							std::string message = tasks[i]->getStorage();
+							tasks[i]->changeJob(ProcessRequest, HTTPResponse(), NULL, message);
+						}
 					}
-					else if (tasks[i]->job() == RECEIVE_REQUEST)
+				}
+				else if (tasks[i]->job() == ProcessRequest)
+				{
+					HTTPRequest request(8000);
+					try
 					{
-						// Принимает запрос
-						std::stringstream message;
-						message << TCP::reciveMessage(tasks[i]->getFD());
+						std::stringstream message(tasks[i]->getStorage());
+						// Парсинг запроса
+						request.parseRequest(message);
 
-						HTTPRequest request(8000);
-						try
+						if (request.isChunked())
 						{
-							// Парсинг запроса
-							request.parseRequest(message);
-
-							if (request.isChunked())
+							ChunkedBody chunked_body;
+							chunked_body.decode(request.getBody());
+							if (chunked_body.getState() == Complete)
 							{
-								ChunkedBody chunked_body;
-								chunked_body.decode(request.getBody());
-								while (chunked_body.getState() != Complete && chunked_body.getState() != Error)
-								{
-									std::stringstream chunk;
-									chunk << TCP::reciveMessage(tasks[i]->getFD());
-									chunked_body.decode(chunk.str());
-								}
-								if (chunked_body.getState() == Complete)
-								{
-									request.setBody((std::string)chunked_body);
-									request.changeChunkedToLength();
-								}
-								else
-									HTTPException(BAD_REQUEST_ERROR);
+								request.setBody((std::string)chunked_body);
+								request.changeChunkedToLength();
 							}
-
-							// Обработать запрос и сформировать задачу
-							_config.getVirtualServerAt(tasks[i]->getVServIndex(),
-														request.getHostField()).processRequest(request, tasks[i]);
-						}
-						catch(const HTTPException& e)
-						{
-							_config.getVirtualServerAt(0, "").formErrorTask(tasks[i], e.getCode(), e.getMessage());
-							if (tasks[i]->job() != GENERATE_ERROR_PAGE)
-								continue ;
+							else
+								throw HTTPException(BAD_REQUEST_ERROR);
 						}
 
-						if (tasks[i]->job() == AUTOINDEX || tasks[i]->job() == GENERATE_ERROR_PAGE)
+						// Обработать запрос и сформировать задачу
+						ClientSocket *socket = tasks[i]->getSocket();
+						VirtualServer *virt_server = _config.getVirtualServer(socket, request.getHostField());
+						if (virt_server) {
+							virt_server->processRequest(request, tasks[i]);
+							descriptors.add(tasks[i]);
+						} else {
+							throw HTTPException(INTERNAL_SERVER_ERROR);
+						}
+					}
+					catch(const HTTPException& e)
+					{
+						ClientSocket *socket = tasks[i]->getSocket();
+						VirtualServer *virt_server = _config.getVirtualServer(socket, "");
+						if (virt_server) {
+							virt_server->formErrorTask(e.getCode(), e.getMessage(), tasks[i]);
+							descriptors.add(tasks[i]);
+						} else {
+							throw std::runtime_error("HTTP Exception Error: can't find proper virtual server!");
+						}
+						continue ;
+					}
+				}
+				else if (tasks[i]->job() == SocketWrite)
+				{
+					// Вывод ответа и завершение задачи
+					ClientSocket *socket = tasks[i]->getSocket();
+					if (socket->writeReady())
+					{
+						if (socket->write(tasks[i]->getStorage()))
 						{
-							TCP::sendMessage(tasks[i]->getFD(), (std::string)tasks[i]->doJob());
-							TCP::closeConnection(tasks[i]->getFD());
-							Task* task = tasks[i];
+							Task *task = tasks[i];
 							tasks.erase(tasks.begin() + i);
 							--i;
 							delete task;
 						}
 					}
-					else
-					{
-						// Выполнить задачу
-						HTTPResponse response = tasks[i]->doJob();
-
-						std::string message = (std::string)response;
-						size_t n = message.length() / MAX_HTTP;
-						size_t reminded = message.length() % MAX_HTTP;
-						size_t offset = 0;
-						for (size_t j = 0; j < n; ++j)
-						{
-							TCP::sendMessage(tasks[i]->returnFD(), message.substr(offset, MAX_HTTP));
-							offset += MAX_HTTP;
-						}
-						TCP::sendMessage(tasks[i]->returnFD(), message.substr(offset, reminded));
-
-						TCP::closeConnection(tasks[i]->returnFD());
-						Task* task = tasks[i];
-						tasks.erase(tasks.begin() + i);
-						--i;
-						delete task;
-					}
+				}
+				else
+				{
+					// Подготовка ответа
+					HTTPResponse response = tasks[i]->doJob();
+					tasks[i]->changeJob(SocketWrite, HTTPResponse(), NULL, (std::string)response);
 				}
 			}
 		}
 	}
-	catch(const std::runtime_error& e)
+	catch(const std::exception& e)
 	{
-		throw e;
+		std::cout << e.what() << std::endl;
+		throw std::runtime_error("FATAL ERROR!");
 	}
 }

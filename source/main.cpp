@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/04 19:55:24 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/29 22:05:07 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/03 01:50:11 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,16 +103,21 @@ int main(int argc, char **argv)
 	location5.setAutoindex(true);
 	location5.setUploadDirectory("/tmp/");
 
-	Location location6("/index/");
+	Location location6("/put");
 	location6.setAllowedMethods(methods_default);
 	location6.setRoot("./../test/www/");
-	location6.setAutoindex(true);
+
+	Location location7("/index/");
+	location7.setAllowedMethods(methods_default);
+	location7.setRoot("./../test/www/");
+	location7.setAutoindex(true);
 
 	virtserver_localhost.addLocation(location1);
 	virtserver_localhost.addLocation(location2);
 	virtserver_localhost.addLocation(location3);
 	virtserver_localhost.addLocation(location5);
 	virtserver_localhost.addLocation(location6);
+	virtserver_localhost.addLocation(location7);
 
 
 	VirtualServer virtserver_8081("localhost", "", 8081);
@@ -155,7 +160,7 @@ int main(int argc, char **argv)
 	{
 		server.start();
 	}
-	catch(const std::exception& e)
+	catch(const std::runtime_error& e)
 	{
 		std::cerr << e.what() << '\n';
 	}

@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 16:17:39 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/23 00:36:44 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/02 19:53:57 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,12 @@
 class VirtualServer
 {
 private:
-	std::string						_server_name;
-	std::string						_ip;
-	size_t							_port;
-	std::map<size_t, std::string>	_error_pages;
-	size_t							_client_max_body_size;
-	std::vector<Location>			_locations;
+	std::string								_server_name;
+	std::string								_ip;
+	size_t									_port;
+	std::map<size_t, std::string>			_error_pages;
+	size_t									_client_max_body_size;
+	std::vector<Location>					_locations;
 
 	VirtualServer();
 public:
@@ -42,8 +42,8 @@ public:
 
 	void addLocation(Location location);
 
-	void formErrorTask(Task* task, size_t code, std::string reason);
-	void processRequest(HTTPRequest request, Task* task);
+	void formErrorTask(size_t code, std::string reason, Task *task);
+	void processRequest(HTTPRequest request, Task *task);
 };
 
 

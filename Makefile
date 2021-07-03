@@ -6,7 +6,7 @@
 #    By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/06/01 19:43:52 by kdustin           #+#    #+#              #
-#    Updated: 2021/06/29 05:55:31 by kdustin          ###   ########.fr        #
+#    Updated: 2021/07/03 01:45:16 by kdustin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,15 +16,16 @@ CXX := clang++
 
 CXXFLAGS := -Wall -Wextra -Werror
 CXXFLAGS += -std=c++98 -pedantic
-CXXFLAGS += -g -DDEBUG							#Debug
+CXXFLAGS += -g #-DDEBUG							#Debug
 
 BUILD_DIR := ./build
 SRC_DIR := ./source
 
 SRCS := File.cpp HTTPException.cpp HTTPMessage.cpp HTTPRequest.cpp \
 	HTTPResponse.cpp Location.cpp main.cpp Method.cpp Path.cpp Config.cpp \
-	Server.cpp TCP.cpp URI.cpp Utilities.cpp VirtualServer.cpp HTMLGenerator.cpp \
-	Directory.cpp Task.cpp get_next_line.cpp get_next_line_utils.cpp ParseConfig.cpp ChunkedBody.cpp FDBuffer.cpp
+	Server.cpp URI.cpp Utilities.cpp VirtualServer.cpp HTMLGenerator.cpp \
+	Directory.cpp Task.cpp get_next_line.cpp get_next_line_utils.cpp ParseConfig.cpp ChunkedBody.cpp FDBuffer.cpp \
+	ConnectionSocket.cpp ClientSocket.cpp Descriptors.cpp Signal.cpp
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 

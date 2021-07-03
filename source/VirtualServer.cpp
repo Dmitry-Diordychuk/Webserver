@@ -6,7 +6,7 @@
 /*   By: kdustin <kdustin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 16:18:43 by kdustin           #+#    #+#             */
-/*   Updated: 2021/06/29 22:41:56 by kdustin          ###   ########.fr       */
+/*   Updated: 2021/07/03 01:05:55 by kdustin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,18 +55,29 @@ void VirtualServer::addLocation(Location location) {
 		std::sort(_locations.begin(), _locations.end(), compLocation);
 }
 
-void VirtualServer::formErrorTask(Task* task, size_t code, std::string reason)
+void VirtualServer::formErrorTask(size_t code, std::string reason, Task *task)
 {
 	File* error_file = new File(_error_pages[code], false);
 	if (!error_file->isOpen())
 	{
-		task->changeJob(GENERATE_ERROR_PAGE, HTTPResponse(code, reason));
+		task->changeJob(
+			GenerateErrorPage,
+			HTTPResponse(code, reason),
+			NULL,
+			""
+		);
 		return ;
 	}
-	task->changeJob(GET_FILE_CONTENT, error_file, HTTPResponse(code, reason));
+	task->changeJob(
+		GetFileContent,
+		HTTPResponse(code, reason),
+		static_cast<void*>(error_file),
+		""
+	);
+	return ;
 }
 
-void VirtualServer::processRequest(HTTPRequest request, Task* task)
+void VirtualServer::processRequest(HTTPRequest request, Task *task)
 {
 	std::vector<Location>::iterator it = _locations.begin();
 	for (; it != _locations.end(); ++it)
@@ -74,65 +85,80 @@ void VirtualServer::processRequest(HTTPRequest request, Task* task)
 		Path response_path = (*it).checkLocation(request.getPath());
 		if (!response_path.empty())
 		{
-			if (!it->checkAllowedMethods(request.getMethod()))
-			{
-				formErrorTask(task, 405, "Method Not Allowed");
+			if (!it->checkAllowedMethods(request.getMethod())) {
+				formErrorTask(405, "Method Not Allowed", task);
 				return ;
-			}
-			else if (request.getMethod() == POST)
-			{
+			} else if (request.getMethod() == POST) {
 				if (request.bodyLength() > it->getMaxBodySize())
 				{
-					formErrorTask(task, 413, "Request Entity Too Large");
+					formErrorTask(413, "Request Entity Too Large", task);
 					return ;
 				}
 				File *file = new File((std::string)response_path, true);
 				if (!file->isOpen())
 				{
-					formErrorTask(task, 500, "Internal Server Error");
+					formErrorTask(500, "Internal Server Error", task);
 					return ;
 				}
 				int code = 200;
 				if (file->wasCreated() == true)
 					code = 201;
-				task->changeJob(UPLOAD, file, it->getUploadPath(request.getPath()), request.getBody(), HTTPResponse(code, "OK"));
+				file->setUriPath(it->getUploadPath(request.getPath()));
+				task->changeJob(
+					UploadFile,
+					HTTPResponse(code, "OK"),
+					static_cast<void*>(file),
+					request.getBody()
+				);
 				return ;
-			}
-			else if (request.getMethod() == DELETE)
-			{
+			} else if (request.getMethod() == DELETE) {
 				File* file = new File((std::string)response_path, false);
 				if (!file->isOpen())
 				{
-					formErrorTask(task, 404, "Not Found");
+					formErrorTask(404, "Not Found", task);
 					return ;
 				}
-				task->changeJob(DELETE_FILE, file, HTTPResponse(200, "OK"));
+				task->changeJob(
+					DeleteFile,
+					HTTPResponse(200, "OK"),
+					static_cast<void*>(file),
+					""
+				);
 				return ;
-			}
-			else if (it->autoindex() && (response_path.directory() || Directory::str_is_dir((std::string)response_path)))
-			{
-				task->changeJob(AUTOINDEX, new Directory((std::string)response_path), (std::string)request.getPath(), HTTPResponse(200, "OK"));
+			} else if (it->autoindex() && (response_path.directory() || Directory::str_is_dir((std::string)response_path))) {
+				Directory *directory = new Directory((std::string)response_path);
+				task->changeJob(
+					GenerateAutoindexPage,
+					HTTPResponse(200, "OK"),
+					static_cast<void*>(directory),
+					(std::string)request.getPath()
+				);
 				return ;
-			}
-			else
-			{
+			} else {
 				response_path.addSegment(it->getIndex());
 				if (!it->getIndex().empty())
 					response_path.setIsDirectory(false);
 				File* file = new File((std::string)response_path, false);
 				if (!file->isOpen())
 				{
-					formErrorTask(task, 404, "Not Found");
+					formErrorTask(404, "Not Found", task);
 					return ;
 				}
+				Job job;
 				if (request.getMethod() == HEAD)
-					task->changeJob(EMPTY_BODY, file, HTTPResponse(200, "OK"));
+					job = SendEmptyBody;
 				else
-					task->changeJob(GET_FILE_CONTENT, file, HTTPResponse(200, "OK"));
+					job = GetFileContent;
+				task->changeJob(
+					job,
+					HTTPResponse(200, "OK"),
+					static_cast<void*>(file),
+					""
+				);
 				return ;
 			}
 		}
 	}
-	formErrorTask(task, 404, "Not Found");
+	formErrorTask(404, "Not Found", task);
 	return ;
 }
